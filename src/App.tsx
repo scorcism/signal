@@ -1,40 +1,40 @@
 
-import { useEffect, useState } from 'react'
 import './App.css'
-import { Signal } from '@preact/signals';
+import { effect, signal } from '@preact/signals-react';
+
+const count = signal(0);
+
+const getOrCreate = () => {
+  const storedValue = localStorage.getItem("counts");
+  if (storedValue !== null) {
+    return parseInt(storedValue);
+  } else {
+    localStorage.setItem("counts", 0);
+    return 0;
+  }
+};
+
+effect(()=>{
+  count.value  = getOrCreate();
+})
 
 function App() {
 
-  let initialCount = 0;
-
-  const [count, setCount] = useState<number>(initialCount);
-
-
-  const updateCount = () => {
-    setCount(count + 1);
-    localStorage.setItem("counts", count.toString());
+  const updateSignalCount = () =>{
+    count.value++;
+    localStorage.setItem("counts", count.value);
   }
 
-
-  const getOrCreate = () => {
-    const storedValue = localStorage.getItem("counts");
-    if (storedValue !== null) {
-      return parseInt(storedValue);
-    } else {
-      localStorage.setItem("counts", 0);
-      return 0;
+  const keyDown = (e:any)=>{
+    if(e.Key == "Enter"){
+      count.value++;
     }
-  };
-
-  useEffect(() => {
-    let initial = getOrCreate();
-    setCount(initial);
-  }, [])
-
+  }
+  
   return (
     <div>
-      <h1>{count}</h1>
-      <button onClick={updateCount}>click</button>
+      <h1>{count.value}</h1>
+      <button onKeyUp={keyDown} onClick={updateSignalCount}>click</button>
     </div>
   )
 }
